@@ -1,6 +1,11 @@
 <!--  наследуемся от шаблона default.html, который мы создавали -->
 {% extends 'flatpages/default.html' %}
 
+{# Теперь будем проверять не request.user.is_authenticated, а конкретные права #}
+    {% if perms.simpleapp.add_post %}
+    <a href="{% url 'post_create' %}">Добавить новость</a>
+    {% endif %}
+
 {% block content %}
 <h1>Публикация новости/статьи/объявления:</h1>
 <hr>

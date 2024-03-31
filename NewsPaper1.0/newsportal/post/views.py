@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin,PermissionRequiredMixin
 
 from .models import Post
 from .filters import PostFilter
@@ -124,7 +125,8 @@ class NotificationList(ListView):
     #     return context
 
 
-class PostCreate(CreateView):
+class PostCreate(PermissionRequiredMixin,CreateView):
+    raise_exception = True
     # Указываем нашу разработанную форму
     form_class = PostForm
     # модель товаров
@@ -159,7 +161,7 @@ class PostHome(ListView):
     paginate_by = 10  # количество записей на странице
 
 
-class PostEdit(UpdateView):
+class PostEdit(PermissionRequiredMixin,UpdateView):
     form_class = EditForm
     model = Post
     template_name = 'post/post_edit.html'
@@ -168,7 +170,7 @@ class PostEdit(UpdateView):
         return super().form_valid(form)
 
 
-class PostDelete(DeleteView):
+class PostDelete(PermissionRequiredMixin,DeleteView):
     model = Post
     template_name = 'post/post_delete.html'
     context_object_name = 'postdelete'

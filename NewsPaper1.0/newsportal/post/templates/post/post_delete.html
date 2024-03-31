@@ -1,6 +1,10 @@
 {% extends 'flatpages/default.html' %}
 {% load censor %}
 
+    {% if perms.simpleapp.delete_post %}
+    <a href="{% url 'post_delete' %}">Удалить новость</a>
+    {% endif %}
+
 {% block content %}
  <h4>{{ postdelete.title }}</h4>
  <a>{{ postdelete.text }}</a>

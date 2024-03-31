@@ -1,5 +1,9 @@
 {% extends 'flatpages/default.html' %}
 
+    {% if perms.simpleapp.edit_psot %}
+    <a href="{% url 'post_edit' %}">Редактировать</a>
+    {% endif %}
+
 {% block content %}
 <h2>Редактирование новости/статьи/объявления:</h2>
 <hr>
