@@ -47,6 +47,7 @@ class Category(models.Model):
 
 # создание модели Новости/статьи, которые создают пользователи
 class Post(models.Model):
+    objects = None
     NEWS = 'NW'
     ARTICLE = 'AR'
     NOTIFICATION = 'NT'
@@ -109,3 +110,15 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+    to=User,
+    on_delete=models.CASCADE,
+    related_name='subscriptions',
+    )
+    post = models.ForeignKey(
+    to='Post',
+    on_delete=models.CASCADE,
+    related_name='subscriptions',
+    )

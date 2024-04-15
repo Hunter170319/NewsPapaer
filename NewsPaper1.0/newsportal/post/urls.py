@@ -1,5 +1,5 @@
 from django.urls import path,include
-from .views import PostDetail, NewsList, ArticleList, NotificationList, PostCreate, PostHome, PostEdit, PostDelete
+from .views import PostDetail, NewsList, ArticleList, NotificationList, PostCreate, PostHome, PostEdit, PostDelete, subscriptions
 from .forms import PostForm
 from django.contrib import admin
 
@@ -13,4 +13,5 @@ urlpatterns = [
     path('news/', NewsList.as_view(), name='news_list'),
     path('article/', ArticleList.as_view(), name='article_list'),
     path('notification/', NotificationList.as_view(), name='notification_list'),
+    path('subscriptions/', subscriptions, name='subscriptions'),
 ]
