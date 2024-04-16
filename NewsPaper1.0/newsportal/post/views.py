@@ -6,13 +6,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.views.decorators.csrf import csrf_protect
 
-from .models import Post, Subscription
+from .models import Post, Subscription, Category
 from .filters import PostFilter
 from .forms import PostForm, EditForm
 
 @login_required
 @csrf_protect
-def subscriptions(request):
+def subscriptions(request, categories=None):
     if request.method == 'POST':
         post_id = request.POST.get('post_id')
         post = Post.objects.get(id=post_id)
@@ -26,7 +26,7 @@ def subscriptions(request):
                 post=post,
             ).delete()
 
-    posts_with_subscriptions = Post.objects.annotate(
+    posts_with_subscriptions = Category.objects.annotate(
         user_subscribed=Exists(
             Subscription.objects.filter(
                 user=request.user,
