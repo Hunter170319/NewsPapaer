@@ -1,14 +1,15 @@
-from celery import shared_task
-import time
+from celery.app import shared_task
+from .management.commands.runapscheduler import my_job
+from django.core.mail import EmailMultiAlternatives
 
 @shared_task
-def hello():
-    time.sleep(10)
-    print("Hello, world!")
+def send_notifications(subject, text_content, html_content, mails_list):
+    for email in set(mails_list):
+         msg = EmailMultiAlternatives(subject, text_content, None, [email])
+         msg.attach_alternative(html_content, "text/html")
+         msg.send()
 
 
 @shared_task
-def printer(N):
-    for i in range(N):
-        time.sleep(1)
-        print(i+1)
+def send_weeklynews():
+    my_job()

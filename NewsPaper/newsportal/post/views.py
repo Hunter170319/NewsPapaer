@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 from .models import Post, Subscription, Category
 from .filters import PostFilter
 from .forms import PostForm, EditForm
-from .tasks import hello, printer, complete_post
 
 @login_required
 @csrf_protect
@@ -216,12 +215,32 @@ class PostDelete(PermissionRequiredMixin,DeleteView):
         self.object.delete()
         return redirect('portal_home')
 
+@login_required
+@csrf_protect
+def subscriptions(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = Category.objects.get(id=category_id)
+        action = request.POST.get('action')
 
-class IndexView(View):
-    def get(self, request):
-        printer.apply_async([10],
-                            eta=datetime.now() + timedelta(seconds=5))
-        hello.delay()
-        return HttpResponse('Hello!')
+        if action == 'subscribe':
+            Subscription.objects.create(user=request.user, category=category)
+        elif action == 'unsubscribe':
+            Subscription.objects.filter(
+                user=request.user,
+                category=category,
+            ).delete()
 
-
+    categories_with_subscriptions = Category.objects.annotate(
+        user_subscribed=Exists(
+            Subscription.objects.filter(
+                user=request.user,
+                category=OuterRef('pk'),
+            )
+        )
+    ).order_by('category')
+    return render(
+        request,
+        'subscriptions.html',
+        {'categories': categories_with_subscriptions},
+    )

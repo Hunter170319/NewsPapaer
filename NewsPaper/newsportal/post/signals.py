@@ -1,34 +1,40 @@
 from django.contrib.auth.models import User
-from django.core.mail import EmailMultiAlternatives
-from django.db.models.signals import post_save
+# from django.core.mail import EmailMultiAlternatives
+from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
+from .tasks import send_notifications
+from .models import PostCategory
 
-from .models import Post
 
-
-@receiver(post_save, sender=Post)
-def post_created(instance, created, **kwargs):
-    if not created:
+@receiver(m2m_changed, sender=PostCategory)
+def post_created(instance, **kwargs):
+    if kwargs['action'] != 'post_add':
         return
 
-    emails = User.objects.filter(
-        subscriptions__post=instance.post
-    ).values_list('email', flat=True)
+    mails_list = []
+    categories = instance.category.all()
+    for cat_pk in categories.values_list('pk', flat=True):
+        mails_list += User.objects.filter(subscriptions__category=cat_pk).values_list('email', flat=True)
 
-    subject = f'Новый пост в категории {instance.category}'
+    subject = f'New post in {" and ".join(categories.values_list("category", flat=True))} is published'
 
     text_content = (
-        f'Пост: {instance.name}\n'
-        f'Категория: {instance.category}\n\n'
-        f'Ссылка на товар: http://127.0.0.1:8000{instance.get_absolute_url()}'
+         f'Author: {instance.author}\n'
+         f'title: {instance.title}\n\n'
+         f'text: {instance.preview}'
+         f'link: http://127.0.0.1:8000{instance.get_absolute_url()}'
     )
+
     html_content = (
-        f'Пост: {instance.name}<br>'
-        f'Категория: {instance.category}<br><br>'
-        f'<a href="http://127.0.0.1{instance.get_absolute_url()}">'
-        f'Ссылка на пост</a>'
+         f'Author: {instance.author}<br>'
+         f'<a href="http://127.0.0.1:8000{instance.get_absolute_url()}">'
+         f'{instance.title}</a>'
+         f'<p>post preview:{instance.preview()}</p>'
+     )
+
+    send_notifications.delay(
+        subject=subject,
+        text_content=text_content,
+        html_content=html_content,
+        mails_list=mails_list
     )
-    for email in emails:
-        msg = EmailMultiAlternatives(subject, text_content, None, [email])
-        msg.attach_alternative(html_content, "text/html")
-        msg.send()

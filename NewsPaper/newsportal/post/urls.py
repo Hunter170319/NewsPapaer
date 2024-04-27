@@ -1,5 +1,7 @@
 from django.urls import path,include
-from .views import PostDetail, NewsList, ArticleList, NotificationList, PostCreate, PostHome, PostEdit, PostDelete, subscriptions
+
+from .views import PostDetail, NewsList, ArticleList, NotificationList, PostCreate, PostHome, PostEdit, PostDelete, \
+     subscribe, unsubscribe
 from .forms import PostForm
 from django.contrib import admin
 from .views import IndexView
@@ -13,6 +15,7 @@ urlpatterns = [
     path('news/', NewsList.as_view(), name='news_list'),
     path('article/', ArticleList.as_view(), name='article_list'),
     path('notification/', NotificationList.as_view(), name='notification_list'),
-    path('subscriptions/', subscriptions, name='subscriptions'),
     path('', IndexView.as_view()),
+    path('categories/<int:pk>/subscribe/', subscribe, name='subscribe'),
+    path('categories/<int:pk>/unsubscribe/', unsubscribe, name='unsubscribe')
 ]

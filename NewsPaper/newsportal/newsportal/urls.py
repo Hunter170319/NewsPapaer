@@ -20,7 +20,8 @@ from django.urls import path, include
 
 #from newsportal.post.views import PostSearch, home_page
 #from newsportal.post import views
-from post import views
+from .post import views
+from NewsPaper.newsportal.post.views import subscriptions
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,5 +31,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path('news/', include('post.urls')),
-
+    path('subscriptions/', subscriptions, name='subscriptions'),
 ]
