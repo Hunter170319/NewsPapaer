@@ -8,10 +8,12 @@ from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
 from django.views import View
 from datetime import datetime, timedelta
+from django.core.cache import cache
 
 from .models import Post, Subscription, Category
 from .filters import PostFilter
 from .forms import PostForm, EditForm
+from .tasks import hello
 
 @login_required
 @csrf_protect
@@ -51,6 +53,15 @@ class PostDetail(DetailView):
     template_name = "post/post_detail.html"
     # Название объекта, в котором будет выбранная пользователем статья
     context_object_name = "postdetail"
+
+    def get_object(self, *args, **kwargs):
+        obj = cache.get(f'product-{self.kwargs["pk"]}',
+                        None)
+
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'product-{self.kwargs["pk"]}', obj)
+            return obj
 
 
 class PostList(ListView):
@@ -244,3 +255,9 @@ def subscriptions(request):
         'subscriptions.html',
         {'categories': categories_with_subscriptions},
     )
+
+
+class IndexView(View):
+    def get(self, request):
+        hello.delay()
+        return HttpResponse('Hello!')

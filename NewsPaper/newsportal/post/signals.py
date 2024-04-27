@@ -3,10 +3,10 @@ from django.contrib.auth.models import User
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from .tasks import send_notifications
-from .models import PostCategory
+from .models import Category
 
 
-@receiver(m2m_changed, sender=PostCategory)
+@receiver(m2m_changed, sender=Category)
 def post_created(instance, **kwargs):
     if kwargs['action'] != 'post_add':
         return

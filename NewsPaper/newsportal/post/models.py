@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.urls import reverse
-
+from django.core.cache import cache
 
 # создание модели Автора новости/статьи
 class Author(models.Model):
@@ -87,6 +87,10 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.delete(f'post-{self.pk}')
 
 
 # создание модели Комментарии

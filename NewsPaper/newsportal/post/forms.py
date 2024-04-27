@@ -38,3 +38,8 @@ class CustomSignupForm(SignupForm):
         msg.send()
 
         return user
+
+class EditForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['category', 'title', 'text']
